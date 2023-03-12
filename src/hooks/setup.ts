@@ -1,7 +1,13 @@
 import p5 from 'p5'
-import { GRID_HEIGHT, GRID_WIDTH, setGrid, updateCell } from '../state/global'
+import { setGrid, updateCell } from '../state/global'
+import { setWidthSlider, setHeightSlider, getWidth, getHeight } from '../state/gui'
 import { newGrid, range } from '../util/range'
 import { getLargestSize } from '../util/screenSize'
+
+const setupGUI = (p: p5) => {
+  setWidthSlider(p.createSlider(4, 64, 8, 1))
+  setHeightSlider(p.createSlider(4, 64, 8, 1))
+}
 
 const setup = (p: p5) => {
   const { width, height } = getLargestSize(p)
@@ -9,14 +15,21 @@ const setup = (p: p5) => {
   canvas.style('display', 'block')
   canvas.style('border', '3px solid black')
 
+  setupGUI(p)
+
   setGrid(newGrid())
-  range(Math.ceil(GRID_WIDTH / 2))
-    .forEach(x => range(Math.ceil(GRID_HEIGHT / 2))
-    .forEach(y => updateCell({ loc: { x, y }, cell: { density: 1,
-    velocity: {
-      x: 2.3,
-      y: 0.4
-    } } })))
+  range(Math.ceil(getWidth() / 2))
+    .forEach(x => range(Math.ceil(getHeight() / 2))
+    .forEach(y => updateCell({
+      loc: { x, y },
+      cell: {
+        density: 1,
+        velocity: {
+          x: 23,
+          y: 8
+        }
+      }
+    })))
 }
 
 export default setup

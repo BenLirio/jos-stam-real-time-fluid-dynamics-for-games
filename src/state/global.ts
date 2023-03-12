@@ -1,9 +1,10 @@
 import { ICell, IGrid, ILoc } from '../types'
 
-export const GRID_WIDTH = 8
-export const GRID_HEIGHT = 8
-export const CELL_WIDTH = 20
 export const DIFFUSION_RATE = 1
+
+let cellWidth = 20
+export const getCellWidth = () => cellWidth
+export const setCellWidth = (newCellWidth: number) => cellWidth = newCellWidth
 
 let grid: IGrid
 export const getGrid = () => grid
