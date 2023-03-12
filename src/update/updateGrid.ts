@@ -1,7 +1,9 @@
-import { DIFFUSION_RATE, getDeltaSeconds, getGrid, setGrid } from '../state/global'
+import { DIFFUSION_RATE, getAdvectionRate, getCellWidth, getDeltaSeconds, getGrid, setGrid } from '../state/global'
 import { getHeight, getWidth } from '../state/gui'
 import { ILoc } from '../types'
-import { clip, newGrid } from '../util/range'
+import { clip, mod, newGrid, range } from '../util/range'
+
+const edgeCell = () => ({ density: 0, velocity: { x: 0, y: 0 }})
 
 const getNeighbors = ({x,y}: ILoc) => 
   [ { x: x - 1, y: y }
@@ -25,24 +27,39 @@ const applyDiffusion = () => setGrid(newGrid().map((rows, y) => rows.map((_, x) 
     density
   }})))
 
-const applyAdvection = () => setGrid(newGrid().map((rows, y) => rows.map((_, x) => {
-  const cur = getGrid()[y][x]
-  const { velocity } = cur
-  const clipX = clip(0.5, getWidth() - 0.5)
-  const clipY = clip(0.5, getHeight() - 0.5)
-  const source = {
-    x: clipX(x - getDeltaSeconds()*velocity.x),
-    y: clipY(y - getDeltaSeconds()*velocity.y)
-  }
-  const xIdx = Math.floor(source.x)
-  const x0 = source.x - xIdx
-  const x1 = 1 - x0
-  const yIdx = Math.floor(source.y)
-  const y0 = source.y - yIdx
-  const y1 = 1 - y0
+const applyAdvection = () => setGrid(range(1, getHeight()+1).map(y => range(1, getWidth()+1).map(x => {
+  const g = (y: number, x: number) => getGrid()[mod(y-1, getHeight())][mod(x-1, getWidth())]
+  const { velocity } = g(y,x)
 
+  const d = {
+    x: getCellWidth(),
+    y: getCellWidth(),
+    t: getDeltaSeconds()
+  }
+  const clipX = clip(0.5, getWidth() + 0.5)
+  const clipY = clip(0.5, getHeight() + 0.5)
+  const s = {
+    x: clipX(x - d.t*getAdvectionRate()*velocity.x/d.x),
+    y: clipY(y - d.t*getAdvectionRate()*velocity.y/d.y)
+  }
+  const yIdx = Math.floor(s.y)
+  const xIdx = Math.floor(s.x)
+  const y1 = (s.y - yIdx)
+  const x1 = (s.x - xIdx)
+  const y0 = 1 - y1
+  const x0 = 1 - x1
+  const weights = [
+    [y0*x0,y0*x1],
+    [y1*x0,y1*x1]
+  ]
+
+  const density = range(2).map(yOff => range(2).map(xOff => 
+    weights[yOff][xOff] * g(yIdx+yOff, xIdx+xOff).density
+  )).flat().reduce((a,b) => a + b, 0)
+  
   return {
-    ...cur
+    ...g(y,x),
+    density
   }
 })))
 

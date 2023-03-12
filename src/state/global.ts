@@ -2,6 +2,10 @@ import { ICell, IGrid, ILoc } from '../types'
 
 export const DIFFUSION_RATE = 1
 
+let advectionRate = 1
+export const getAdvectionRate = () => advectionRate
+export const setAdvectionRate = (newAdvectionRate: number) => advectionRate = newAdvectionRate
+
 let cellWidth = 20
 export const getCellWidth = () => cellWidth
 export const setCellWidth = (newCellWidth: number) => cellWidth = newCellWidth

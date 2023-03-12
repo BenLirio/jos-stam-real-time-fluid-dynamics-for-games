@@ -18,15 +18,15 @@ const setup = (p: p5) => {
   setupGUI(p)
 
   setGrid(newGrid())
-  range(Math.ceil(getWidth() / 2))
-    .forEach(x => range(Math.ceil(getHeight() / 2))
+  range(Math.ceil(getWidth()))
+    .forEach(x => range(Math.ceil(getHeight()))
     .forEach(y => updateCell({
       loc: { x, y },
       cell: {
-        density: 1,
+        density: x < 5 && y < 5 ? 1 : 0,
         velocity: {
-          x: 23,
-          y: 8
+          x: x,
+          y: y
         }
       }
     })))
