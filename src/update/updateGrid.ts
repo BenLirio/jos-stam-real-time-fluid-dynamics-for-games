@@ -10,10 +10,10 @@ const getNeighbors = ({x,y}: ILoc) =>
   , { x: x + 1, y: y }
   , { x: x, y: y - 1 }
   , { x: x, y: y + 1 }
-  ].filter(({x,y}) =>
-    x >= 0 && x < getWidth() &&
-    y >= 0 && y < getHeight()
-  )
+  ].map(({x,y}) => ({
+    x: mod(x, getWidth()),
+    y: mod(y, getHeight())
+  }))
 
 const applyDiffusion = () => setGrid(newGrid().map((rows, y) => rows.map((_, x) => {
   const neighbors = getNeighbors({x,y})
@@ -25,6 +25,36 @@ const applyDiffusion = () => setGrid(newGrid().map((rows, y) => rows.map((_, x) 
   return { 
     ...cur,
     density
+  }})))
+
+const applyVelocityYDiffusion = () => setGrid(newGrid().map((rows, y) => rows.map((_, x) => {
+  const neighbors = getNeighbors({x,y})
+  const averageNeighbors = neighbors
+    .map(({x,y}) => getGrid()[y][x].velocity.y / neighbors.length)
+    .reduce((a,b) => a + b, 0)
+  const cur = getGrid()[y][x]
+  const velocityY = cur.velocity.y - getDeltaSeconds()*DIFFUSION_RATE*(cur.velocity.y - averageNeighbors)
+  return { 
+    ...cur,
+    velocity: {
+      ...cur.velocity,
+      y: velocityY
+    }
+  }})))
+
+const applyVelocityXDiffusion = () => setGrid(newGrid().map((rows, y) => rows.map((_, x) => {
+  const neighbors = getNeighbors({x,y})
+  const averageNeighbors = neighbors
+    .map(({x,y}) => getGrid()[y][x].velocity.x / neighbors.length)
+    .reduce((a,b) => a + b, 0)
+  const cur = getGrid()[y][x]
+  const velocityX = cur.velocity.x - getDeltaSeconds()*DIFFUSION_RATE*(cur.velocity.x - averageNeighbors)
+  return { 
+    ...cur,
+    velocity: {
+      ...cur.velocity,
+      x: velocityX
+    }
   }})))
 
 const applyAdvection = () => setGrid(range(1, getHeight()+1).map(y => range(1, getWidth()+1).map(x => {
@@ -74,4 +104,6 @@ export const updateGrid = () => {
   }
   applyDiffusion()
   applyAdvection()
+  applyVelocityYDiffusion()
+  applyVelocityXDiffusion()
 }
