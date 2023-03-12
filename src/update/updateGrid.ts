@@ -1,82 +1,9 @@
-import { DIFFUSION_RATE, getAdvectionRate, getCellWidth, getDeltaSeconds, getGrid, setGrid } from '../state/global'
+import { getAdvectionRate, getCellWidth, getDeltaSeconds, getGrid, setGrid } from '../state/global'
 import { getHeight, getWidth } from '../state/gui'
-import {  ICell, ILoc } from '../types'
-import { add } from '../util/base'
+import { ILoc } from '../types'
 import { applyKernel } from '../util/kernel'
 import { clip, mod, newGrid, range } from '../util/range'
-
-const getNeighbors = ({x,y}: ILoc) => 
-  [ { x: x - 1, y: y }
-  , { x: x + 1, y: y }
-  , { x: x, y: y - 1 }
-  , { x: x, y: y + 1 }
-  ].map(({x,y}) => ({
-    x: mod(x, getWidth()),
-    y: mod(y, getHeight())
-  }))
-
-const applyDensityDiffusion = () => setGrid(newGrid().map((rows, y) => rows.map((_, x) => {
-  const neighbors = getNeighbors({x,y})
-  const averageNeighbors = neighbors
-    .map(({x,y}) => getGrid()[y][x].density / neighbors.length)
-    .reduce((a,b) => a + b, 0)
-  const cur = getGrid()[y][x]
-  const density = cur.density - getDeltaSeconds()*DIFFUSION_RATE*(cur.density - averageNeighbors)
-  return { 
-    ...cur,
-    density
-  }})))
-
-const get4NeighborCells = ({x,y}: ILoc) =>
-  [ { x: x - 1, y: y }
-  , { x: x + 1, y: y }
-  , { x: x, y: y - 1 }
-  , { x: x, y: y + 1 }
-  ].map(({x,y}) => ({
-    x: mod(x, getWidth()),
-    y: mod(y, getHeight())
-  })).map(({x,y}) => getGrid()[y][x])
-
-const densityDiffusionKernel = (cell: ICell) => {
-  const { position, density } = cell
-  return {
-    ...cell,
-    density: density - getDeltaSeconds()*DIFFUSION_RATE*(density -
-      get4NeighborCells(position)
-        .map(({density}) => density)
-        .reduce(add) / 4)
-  }
-}
-
-const applyVelocityYDiffusion = () => setGrid(newGrid().map((rows, y) => rows.map((_, x) => {
-  const neighbors = getNeighbors({x,y})
-  const averageNeighbors = neighbors
-    .map(({x,y}) => getGrid()[y][x].velocity.y / neighbors.length)
-    .reduce((a,b) => a + b, 0)
-  const cur = getGrid()[y][x]
-  const velocityY = cur.velocity.y - getDeltaSeconds()*DIFFUSION_RATE*(cur.velocity.y - averageNeighbors)
-  return { 
-    ...cur,
-    velocity: {
-      ...cur.velocity,
-      y: velocityY
-    }
-  }})))
-
-const applyVelocityXDiffusion = () => setGrid(newGrid().map((rows, y) => rows.map((_, x) => {
-  const neighbors = getNeighbors({x,y})
-  const averageNeighbors = neighbors
-    .map(({x,y}) => getGrid()[y][x].velocity.x / neighbors.length)
-    .reduce((a,b) => a + b, 0)
-  const cur = getGrid()[y][x]
-  const velocityX = cur.velocity.x - getDeltaSeconds()*DIFFUSION_RATE*(cur.velocity.x - averageNeighbors)
-  return { 
-    ...cur,
-    velocity: {
-      ...cur.velocity,
-      x: velocityX
-    }
-  }})))
+import { densityDiffusionKernel, velocityXDiffusionKernel, velocityYDiffusionKernel } from './diffusion'
 
 const applyAdvection = () => setGrid(range(1, getHeight()+1).map(y => range(1, getWidth()+1).map(x => {
   const g = (y: number, x: number) => getGrid()[mod(y-1, getHeight())][mod(x-1, getWidth())]
@@ -119,8 +46,8 @@ const updateDensity = () => {
   applyAdvection()
 }
 const updateVelocity = () => {
-  applyVelocityYDiffusion()
-  applyVelocityXDiffusion()
+  applyKernel(velocityXDiffusionKernel)
+  applyKernel(velocityYDiffusionKernel)
 }
 
 const fillUndefined = () => {
@@ -141,5 +68,5 @@ const fillUndefined = () => {
 export const updateGrid = () => {
   fillUndefined()
   updateDensity()
-  // updateVelocity()
+  updateVelocity()
 }
