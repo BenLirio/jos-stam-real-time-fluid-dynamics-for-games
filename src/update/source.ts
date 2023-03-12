@@ -8,8 +8,8 @@ export const sourceKernel = (cell: ICell) => {
     ...cell,
     color: {
       ...cell.color,
-      red: y===1 && x===1 ? 1 : cell.color.red,
-      green: y-1===Math.floor(getHeight()/2) && x-1===Math.floor(getWidth()/2) ? 1 : cell.color.green,
+      red: y-1===Math.floor(getHeight()/3) && x-1===Math.floor(getWidth()/2) ? 1 : cell.color.red,
+      green: y-1===Math.floor(getHeight()*2/3) && x-1===Math.floor(getWidth()/2) ? 1 : cell.color.green,
     }
   })
 }

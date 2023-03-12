@@ -3,7 +3,7 @@ import { mod } from '../util/range'
 import { getHeight, getWidth } from './gui'
 
 export const SINK_RATE = 0.99
-export const DIFFUSION_RATE = 1
+export const DIFFUSION_RATE = 0.01
 
 let advectionRate = 1
 export const getAdvectionRate = () => advectionRate
@@ -30,14 +30,17 @@ export const setCell = (cell: ICell) => {
   grid[cell.position.y-1][cell.position.x-1] = cell
 }
 
-export const applyKernel = (f: (cell: ICell) => ICell) => {
+export const applyKernel = (f: (cell: ICell) => ICell, iterations = 1) => {
   swapGrids()
-  for (let y = 1; y <= grid.length; y++) {
-    for (let x = 1; x <= grid[y-1].length; x++) {
-      setCell(f(getPrevCell({x,y})))
+  for (let k = 0; k < iterations; k++) {
+    for (let y = 1; y <= grid.length; y++) {
+      for (let x = 1; x <= grid[y-1].length; x++) {
+        setCell(f(getPrevCell({x,y})))
+      }
     }
   }
 }
+
 export const getCells = () => grid.flat()
 const newGrid = () => Array(getHeight()).fill(0).map((_,y) => Array(getWidth()).fill(0).map((_,x) => ({
   position: {x: x+1, y: y+1},
