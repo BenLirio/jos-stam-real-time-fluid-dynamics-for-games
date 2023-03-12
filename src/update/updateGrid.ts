@@ -12,7 +12,7 @@ const getNeighbors = ({x,y}: ILoc) =>
     y >= 0 && y < GRID_HEIGHT
   )
 
-export const updateGrid = () => {
+const applyDiffusion = () => {
   const prevGrid = getGrid()
   const grid = newGrid().map((rows, y) => 
     rows.map((_, x) => {
@@ -20,10 +20,16 @@ export const updateGrid = () => {
        const averageNeighbors = neighbors
         .map(({x,y}) => prevGrid[y][x].density / neighbors.length)
         .reduce((a,b) => a + b, 0)
-      const cur = prevGrid[y][x].density
-      const density = cur - getDeltaSeconds()*DIFFUSION_RATE*(cur - averageNeighbors)
-      return { density }
+      const cur = prevGrid[y][x]
+      const density = cur.density - getDeltaSeconds()*DIFFUSION_RATE*(cur.density - averageNeighbors)
+      return { 
+        ...cur,
+        density
+      }
     })
   )
   setGrid(grid)
+}
+export const updateGrid = () => {
+  applyDiffusion()
 }

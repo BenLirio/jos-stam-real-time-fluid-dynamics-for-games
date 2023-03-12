@@ -12,7 +12,11 @@ const setup = (p: p5) => {
   setGrid(newGrid())
   range(Math.ceil(GRID_WIDTH / 2))
     .forEach(x => range(Math.ceil(GRID_HEIGHT / 2))
-    .forEach(y => updateCell({ loc: { x, y }, cell: { density: 1 } })))
+    .forEach(y => updateCell({ loc: { x, y }, cell: { density: 1,
+    velocity: {
+      x: 2.3,
+      y: 0.4
+    } } })))
 }
 
 export default setup
