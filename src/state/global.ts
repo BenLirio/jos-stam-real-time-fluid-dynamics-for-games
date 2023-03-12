@@ -2,6 +2,7 @@ import { ICell, IGrid, ILoc } from '../types'
 import { mod } from '../util/range'
 import { getHeight, getWidth } from './gui'
 
+export const SINK_RATE = 0.99
 export const DIFFUSION_RATE = 1
 
 let advectionRate = 1
@@ -40,8 +41,15 @@ export const applyKernel = (f: (cell: ICell) => ICell) => {
 export const getCells = () => grid.flat()
 const newGrid = () => Array(getHeight()).fill(0).map((_,y) => Array(getWidth()).fill(0).map((_,x) => ({
   position: {x: x+1, y: y+1},
-  velocity: {x: 0, y: 0},
-  density: 0,
+  velocity: {
+    x: 0,
+    y: 0,
+  },
+  color: {
+    red: 0,
+    green: 0,
+    blue: 0,
+  }
 })))
 
 export const resizeGrid = () => {

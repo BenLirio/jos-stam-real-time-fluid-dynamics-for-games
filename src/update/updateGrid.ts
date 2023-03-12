@@ -1,10 +1,25 @@
-import { applyKernel, getCells, resizeGrid } from '../state/global'
-import { densityAdvectionKernel } from './advection'
-import { densityDiffusionKernel, velocityXDiffusionKernel, velocityYDiffusionKernel } from './diffusion'
+import { applyKernel, resizeGrid } from '../state/global'
+import { blueAdvectionKernel, greenAdvectionKernel, redAdvectionKernel } from './advection'
+import { blueDiffusionKernel, greenDiffusionKernel, redDiffusionKernel, velocityXDiffusionKernel, velocityYDiffusionKernel } from './diffusion'
+import { sinkKernel, sourceKernel, velocitySource } from './source'
+
+const updateSource = () => {
+  [
+    sourceKernel,
+    sinkKernel,
+    velocitySource
+  ].forEach(applyKernel)
+}
 
 const updateDensity = () => {
-  applyKernel(densityDiffusionKernel)
-  applyKernel(densityAdvectionKernel)
+  [
+    redDiffusionKernel,
+    greenDiffusionKernel,
+    blueDiffusionKernel,
+    redAdvectionKernel,
+    greenAdvectionKernel,
+    blueAdvectionKernel
+  ].forEach(applyKernel)
 }
 const updateVelocity = () => {
   applyKernel(velocityXDiffusionKernel)
@@ -13,6 +28,7 @@ const updateVelocity = () => {
 
 export const updateGrid = () => {
   resizeGrid()
+  updateSource()
   updateDensity()
   updateVelocity()
 }

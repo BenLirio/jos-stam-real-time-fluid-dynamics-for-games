@@ -15,10 +15,19 @@ const makeDiffusionKernel = (f: (cell: ICell) => number, g: (cell: ICell, value:
     - getDeltaSeconds()*DIFFUSION_RATE*(f(cell) -
       get4NeighborCells(cell).map(f).reduce(add) / 4))
 
-export const densityDiffusionKernel = makeDiffusionKernel(
-  ({density}) => density,
-  (cell, density) => ({...cell, density})
+export const redDiffusionKernel = makeDiffusionKernel(
+  ({color: {red}}) => red,
+  (cell, red) => ({...cell, color: {...cell.color, red}})
 )
+export const greenDiffusionKernel = makeDiffusionKernel(
+  ({color: {green}}) => green,
+  (cell, green) => ({...cell, color: {...cell.color, green}})
+)
+export const blueDiffusionKernel = makeDiffusionKernel(
+  ({color: {blue}}) => blue,
+  (cell, blue) => ({...cell, color: {...cell.color, blue}})
+)
+
 export const velocityXDiffusionKernel = makeDiffusionKernel(
   ({velocity: {x}}) => x,
   (cell, x) => ({...cell, velocity: {...cell.velocity, x}})
