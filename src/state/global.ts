@@ -10,7 +10,14 @@ let cellWidth = 20
 export const getCellWidth = () => cellWidth
 export const setCellWidth = (newCellWidth: number) => cellWidth = newCellWidth
 
+let prevGrid: IGrid
 let grid: IGrid
+export const getPrevGrid = () => prevGrid
+export const swapGrids = () => {
+  const tmp = prevGrid
+  prevGrid = grid
+  grid = tmp
+}
 export const getGrid = () => grid
 export const setGrid = (newGrid: IGrid) => grid = newGrid
 export const updateCell = ({ loc, cell }: { loc: ILoc, cell: ICell }) => 

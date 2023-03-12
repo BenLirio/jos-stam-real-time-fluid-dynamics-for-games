@@ -1,9 +1,9 @@
 import { DIFFUSION_RATE, getAdvectionRate, getCellWidth, getDeltaSeconds, getGrid, setGrid } from '../state/global'
 import { getHeight, getWidth } from '../state/gui'
-import { ILoc } from '../types'
+import {  ICell, ILoc } from '../types'
+import { add } from '../util/base'
+import { applyKernel } from '../util/kernel'
 import { clip, mod, newGrid, range } from '../util/range'
-
-const edgeCell = () => ({ density: 0, velocity: { x: 0, y: 0 }})
 
 const getNeighbors = ({x,y}: ILoc) => 
   [ { x: x - 1, y: y }
@@ -15,7 +15,7 @@ const getNeighbors = ({x,y}: ILoc) =>
     y: mod(y, getHeight())
   }))
 
-const applyDiffusion = () => setGrid(newGrid().map((rows, y) => rows.map((_, x) => {
+const applyDensityDiffusion = () => setGrid(newGrid().map((rows, y) => rows.map((_, x) => {
   const neighbors = getNeighbors({x,y})
   const averageNeighbors = neighbors
     .map(({x,y}) => getGrid()[y][x].density / neighbors.length)
@@ -26,6 +26,27 @@ const applyDiffusion = () => setGrid(newGrid().map((rows, y) => rows.map((_, x) 
     ...cur,
     density
   }})))
+
+const get4NeighborCells = ({x,y}: ILoc) =>
+  [ { x: x - 1, y: y }
+  , { x: x + 1, y: y }
+  , { x: x, y: y - 1 }
+  , { x: x, y: y + 1 }
+  ].map(({x,y}) => ({
+    x: mod(x, getWidth()),
+    y: mod(y, getHeight())
+  })).map(({x,y}) => getGrid()[y][x])
+
+const densityDiffusionKernel = (cell: ICell) => {
+  const { position, density } = cell
+  return {
+    ...cell,
+    density: density - getDeltaSeconds()*DIFFUSION_RATE*(density -
+      get4NeighborCells(position)
+        .map(({density}) => density)
+        .reduce(add) / 4)
+  }
+}
 
 const applyVelocityYDiffusion = () => setGrid(newGrid().map((rows, y) => rows.map((_, x) => {
   const neighbors = getNeighbors({x,y})
@@ -93,17 +114,32 @@ const applyAdvection = () => setGrid(range(1, getHeight()+1).map(y => range(1, g
   }
 })))
 
-export const updateGrid = () => {
+const updateDensity = () => {
+  applyKernel(densityDiffusionKernel)
+  applyAdvection()
+}
+const updateVelocity = () => {
+  applyVelocityYDiffusion()
+  applyVelocityXDiffusion()
+}
+
+const fillUndefined = () => {
   if (getGrid().length !== getHeight() || getGrid()[0].length !== getWidth()) {
     setGrid(newGrid().map((row, y) => row.map((cell, x) => ({
       density: getGrid()[y]?.[x]?.density || 0,
+      position: {
+        x: getGrid()[y]?.[x]?.position.x || 0,
+        y: getGrid()[y]?.[x]?.position.y || 0
+      },
       velocity: {
         x: getGrid()[y]?.[x]?.velocity.x || 0,
         y: getGrid()[y]?.[x]?.velocity.y || 0
       }}))))
   }
-  applyDiffusion()
-  applyAdvection()
-  applyVelocityYDiffusion()
-  applyVelocityXDiffusion()
+}
+
+export const updateGrid = () => {
+  fillUndefined()
+  updateDensity()
+  // updateVelocity()
 }
