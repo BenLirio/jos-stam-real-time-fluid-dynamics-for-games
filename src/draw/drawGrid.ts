@@ -1,8 +1,8 @@
 import p5 from 'p5'
-import { getCellWidth, getDeltaSeconds, getGrid } from '../state/global'
+import { getCellWidth, getDeltaSeconds, _getGrid } from '../state/global'
 
 export const drawGrid = (p: p5) => {
-  const grid = getGrid()
+  const grid = _getGrid()
   grid.forEach((row, y) => {
     row.forEach((cell, x) => {
       const d = {

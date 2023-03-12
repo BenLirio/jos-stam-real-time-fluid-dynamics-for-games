@@ -1,5 +1,5 @@
 import p5 from 'p5'
-import { setGrid, swapGrids, updateCell } from '../state/global'
+import { setCell, _setGrid, swapGrids } from '../state/global'
 import { setWidthSlider, setHeightSlider, getWidth, getHeight } from '../state/gui'
 import { newGrid, range } from '../util/range'
 import { getLargestSize } from '../util/screenSize'
@@ -17,19 +17,17 @@ const setup = (p: p5) => {
 
   setupGUI(p)
 
-  setGrid(newGrid())
+  _setGrid(newGrid())
   swapGrids()
-  setGrid(newGrid())
-  range(Math.ceil(getWidth()))
-    .forEach(x => range(Math.ceil(getHeight()))
-    .forEach(y => updateCell({
-      loc: { x, y },
-      cell: {
+  _setGrid(newGrid())
+  range(1, Math.ceil(getWidth())+1)
+    .forEach(x => range(1, Math.ceil(getHeight())+1)
+    .forEach(y => setCell({
         density: x < 5 && y < 5 ? 1 : 0,
         position: { x, y },
-        velocity: { x, y }
+        velocity: { x: 20/y, y: 20/x }
       }
-    })))
+    )))
 }
 
 export default setup

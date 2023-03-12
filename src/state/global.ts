@@ -1,4 +1,6 @@
 import { ICell, IGrid, ILoc } from '../types'
+import { mod } from '../util/range'
+import { getHeight, getWidth } from './gui'
 
 export const DIFFUSION_RATE = 1
 
@@ -18,10 +20,17 @@ export const swapGrids = () => {
   prevGrid = grid
   grid = tmp
 }
-export const getGrid = () => grid
-export const setGrid = (newGrid: IGrid) => grid = newGrid
-export const updateCell = ({ loc, cell }: { loc: ILoc, cell: ICell }) => 
-  grid[loc.x][loc.y] = cell
+export const _getGrid = () => grid
+export const _setGrid = (newGrid: IGrid) => grid = newGrid
+
+const normalizeCords = ({x, y}: ILoc) => ({
+  x: mod(x-1, getWidth()),
+  y: mod(y-1, getHeight()),
+})
+export const getCell = (loc: ILoc) => grid[normalizeCords(loc).y][normalizeCords(loc).x]
+export const getPrevCell = (loc: ILoc) => prevGrid[normalizeCords(loc).y][normalizeCords(loc).x]
+export const setCell = (cell: ICell) =>
+  grid[cell.position.y-1][cell.position.x-1] = cell
 
 
 let prev: number = Date.now()

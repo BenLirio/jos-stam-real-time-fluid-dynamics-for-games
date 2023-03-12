@@ -7,12 +7,14 @@ export const range = (x: number, y?: number, step = 1) => {
   return Array(n).fill(0).map((_, i) => start + i * step)
 }
 export const mod = (n: number, m: number) => ((n % m) + m) % m
+
 export const newGrid = () =>
-  range(getHeight()).map((_, y) =>
-    range(getWidth()).map((_, x) => ({
+  range(1, getHeight()+1).map((_, y) =>
+    range(1, getWidth()+1).map((_, x) => ({
       density: 0,
       position: { x, y },
       velocity: { x: 0, y: 0 }
     })))
+
 export const clip = (min: number, max: number) => (n: number) =>
   Math.min(Math.max(n, min), max)
