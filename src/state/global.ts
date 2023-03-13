@@ -1,4 +1,4 @@
-import { ICell, IGrid, ILoc } from '../types'
+import { ICell, IGrid, ILoc, IMouse } from '../types'
 import { mod } from '../util/range'
 import { getHeight, getWidth } from './gui'
 
@@ -52,7 +52,8 @@ const newGrid = () => Array(getHeight()).fill(0).map((_,y) => Array(getWidth()).
     red: 0,
     green: 0,
     blue: 0,
-  }
+  },
+  pressure: 0,
 })))
 
 export const resizeGrid = () => {
@@ -70,3 +71,16 @@ export const setDelta = () => {
   prev = Date.now()
 }
 export const getDeltaSeconds = () => delta / 1000
+
+let mouse: IMouse = {
+  position: {
+    x: 0,
+    y: 0,
+  },
+  velocity: {
+    x: 0,
+    y: 0,
+  },
+}
+export const getMouse = () => mouse
+export const setMouse = (newMouse: IMouse) => mouse = newMouse

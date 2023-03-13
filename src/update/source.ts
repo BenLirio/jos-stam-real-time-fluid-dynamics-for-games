@@ -1,6 +1,7 @@
-import { getDeltaSeconds, SINK_RATE } from '../state/global'
+import { getCellWidth, getDeltaSeconds, getMouse, SINK_RATE } from '../state/global'
 import { getHeight, getWidth } from '../state/gui'
 import { ICell } from '../types'
+import { dist2 } from '../util/base'
 
 export const sourceKernel = (cell: ICell) => {
   const {position: {x,y}} = cell
@@ -25,7 +26,7 @@ export const sinkKernel = (cell: ICell) => {
   })
 }
 export const velocitySource = (cell: ICell) => {
-  const SOURCE_SPEED = 30
+  const SOURCE_SPEED = 1
   const {position: {x,y}} = cell
   return {
     ...cell,
@@ -40,6 +41,21 @@ export const velocitySource = (cell: ICell) => {
         : y-1===Math.floor(getHeight()*2/3)
         ? -SOURCE_SPEED/5
         : cell.velocity.x,
+    }
+  }
+}
+
+export const mouseVelocitySource = (cell: ICell) => {
+  const position = {
+    x: cell.position.x*getCellWidth(),
+    y: cell.position.y*getCellWidth(),
+  }
+  const d = Math.max(dist2(position, getMouse().position), getCellWidth())
+  return {
+    ...cell,
+    velocity: {
+      x: cell.velocity.x + getMouse().velocity.x/d,
+      y: cell.velocity.y + getMouse().velocity.y/d,
     }
   }
 }
