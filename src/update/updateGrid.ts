@@ -15,20 +15,22 @@ import {
   stableVelocityYDiffusionKernel
 } from './diffusion'
 import { prepareProjectKernel, solveProjectKernel, writeProjectKernel } from './project'
-import { mouseVelocitySource, sinkKernel, sourceKernel, velocitySource } from './source'
+import { mouseColorSource, mouseVelocitySource, sinkKernel, sourceKernel } from './source'
 
 const GUASS_SEIDEL_ITERATIONS = 4
 
-const useKernel = (kernel: (cell: ICell) => ICell, iterations = 1) => ({
+const useKernel = (kernel: (cell: ICell) => ICell, iterations = 1, swap = true) => ({
   kernel,
   iterations,
+  swap
 })
 
 /* Source */
 const sourceKernels = [
-  sourceKernel,
+  // sourceKernel,
   sinkKernel,
   mouseVelocitySource,
+  mouseColorSource,
   // velocitySource
 ].map(k => useKernel(k))
 
@@ -51,9 +53,10 @@ const colorKernels = [
 
 /* Project */
 const projectKernels = [
-  useKernel(prepareProjectKernel),
-  useKernel(solveProjectKernel, GUASS_SEIDEL_ITERATIONS),
-  useKernel(writeProjectKernel)
+  useKernel(prepareProjectKernel, 1),
+  useKernel(prepareProjectKernel, 1),
+  useKernel(solveProjectKernel, GUASS_SEIDEL_ITERATIONS, false),
+  useKernel(writeProjectKernel, 1, false)
 ]
 
 /* Velocity */
@@ -67,9 +70,9 @@ const velocityAdvectionKernels = [
 ].map(k => useKernel(k))
 const velocityKernels = [
   ...velocityDiffusionKernels,
-  // ...projectKernels,
+  ...projectKernels,
   ...velocityAdvectionKernels,
-  // ...projectKernels
+  ...projectKernels
 ]
 
 export const updateGrid = () => {
@@ -78,5 +81,5 @@ export const updateGrid = () => {
     ...sourceKernels,
     ...colorKernels,
     ...velocityKernels,
-  ].forEach(({kernel, iterations}) => applyKernel(kernel, iterations))
+  ].forEach(({kernel, iterations, swap}) => applyKernel(kernel, iterations, swap))
 }

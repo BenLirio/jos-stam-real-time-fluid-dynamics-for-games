@@ -2,10 +2,12 @@ import { ICell, IGrid, ILoc, IMouse } from '../types'
 import { mod } from '../util/range'
 import { getHeight, getWidth } from './gui'
 
-export const SINK_RATE = 0.99
-export const DIFFUSION_RATE = 0.01
+export const COLOR_SOURCE_RATE = 300
+export const COLOR_SINK_RATE = 0.9
+export const VELOCITY_SINK_RATE = 1
+export const DIFFUSION_RATE = 0.001
 
-let advectionRate = 1
+let advectionRate = 0.01
 export const getAdvectionRate = () => advectionRate
 export const setAdvectionRate = (newAdvectionRate: number) => advectionRate = newAdvectionRate
 
@@ -30,12 +32,16 @@ export const setCell = (cell: ICell) => {
   grid[cell.position.y-1][cell.position.x-1] = cell
 }
 
-export const applyKernel = (f: (cell: ICell) => ICell, iterations = 1) => {
-  swapGrids()
+export const applyKernel = (f: (cell: ICell) => ICell, iterations: number, swap: boolean) => {
+  if (swap) swapGrids()
   for (let k = 0; k < iterations; k++) {
     for (let y = 1; y <= grid.length; y++) {
       for (let x = 1; x <= grid[y-1].length; x++) {
-        setCell(f(getPrevCell({x,y})))
+        setCell(f(
+          swap ? 
+          getPrevCell({x,y})
+          : getCell({x,y})
+        ))
       }
     }
   }
@@ -63,14 +69,17 @@ export const resizeGrid = () => {
   grid = newGrid()
 }
 
+let elapsed = 0
 let prev: number = Date.now()
 let delta: number
 export const getDelta = () => delta
 export const setDelta = () => {
   delta = Date.now() - prev
+  elapsed += delta
   prev = Date.now()
 }
 export const getDeltaSeconds = () => delta / 1000
+export const getElapsedSeconds = () => elapsed / 1000
 
 let mouse: IMouse = {
   position: {

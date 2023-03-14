@@ -8,13 +8,13 @@ const makeAdvectionKernel = (f: (cell: ICell) => number, g: (cell: ICell, value:
   const d = {
     x: getCellWidth(),
     y: getCellWidth(),
-    t: getDeltaSeconds()
+    t: getDeltaSeconds()*getWidth()*getHeight()
   }
   const clipX = clip(0.5, getWidth() + 0.5)
   const clipY = clip(0.5, getHeight() + 0.5)
   const s = {
-    x: clipX(x - d.t*getAdvectionRate()*velocity.x/d.x),
-    y: clipY(y - d.t*getAdvectionRate()*velocity.y/d.y)
+    x: clipX(x - d.t*getAdvectionRate()*velocity.x),
+    y: clipY(y - d.t*getAdvectionRate()*velocity.y)
   }
   const yIdx = Math.floor(s.y)
   const xIdx = Math.floor(s.x)

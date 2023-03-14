@@ -6,8 +6,8 @@ import { range } from '../util/range'
 import { getLargestSize } from '../util/screenSize'
 
 const setupGUI = (p: p5) => {
-  setWidthSlider(p.createSlider(4, 64, 8, 1))
-  setHeightSlider(p.createSlider(4, 64, 8, 1))
+  setWidthSlider(p.createSlider(4, 64, 32, 1))
+  setHeightSlider(p.createSlider(4, 64, 16, 1))
 }
 
 const setup = (p: p5) => {
